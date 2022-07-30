@@ -62,18 +62,14 @@ def media_images(context, post, main=True):
     :rtype: list
     """
     plugins = media_plugins(context, post)
-    if main:
-        image_method = "get_main_image"
-    else:
-        image_method = "get_thumb_image"
+    image_method = "get_main_image" if main else "get_thumb_image"
     images = []
     for plugin in plugins:
         try:
             images.append(getattr(plugin, image_method)())
         except Exception:
             try:
-                image = plugin.poster
-                if image:
+                if image := plugin.poster:
                     images.append(image.url)
             except AttributeError:
                 pass

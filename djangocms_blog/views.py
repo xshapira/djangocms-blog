@@ -33,7 +33,10 @@ class BaseBlogView(AppConfigMixin, ViewUrlMixin):
 
     def get_view_url(self):
         if not self.view_url_name:
-            raise ImproperlyConfigured("Missing `view_url_name` attribute on {}".format(self.__class__.__name__))
+            raise ImproperlyConfigured(
+                f"Missing `view_url_name` attribute on {self.__class__.__name__}"
+            )
+
 
         url = reverse(self.view_url_name, args=self.args, kwargs=self.kwargs, current_app=self.namespace)
         return self.request.build_absolute_uri(url)
@@ -115,9 +118,9 @@ class PostArchiveView(BaseBlogListView, ListView):
     def get_queryset(self):
         qs = super().get_queryset()
         if "month" in self.kwargs:
-            qs = qs.filter(**{"%s__month" % self.date_field: self.kwargs["month"]})
+            qs = qs.filter(**{f"{self.date_field}__month": self.kwargs["month"]})
         if "year" in self.kwargs:
-            qs = qs.filter(**{"%s__year" % self.date_field: self.kwargs["year"]})
+            qs = qs.filter(**{f"{self.date_field}__year": self.kwargs["year"]})
         return self.optimize(qs)
 
     def get_context_data(self, **kwargs):
@@ -125,8 +128,7 @@ class PostArchiveView(BaseBlogListView, ListView):
         kwargs["year"] = int(self.kwargs.get("year")) if "year" in self.kwargs else None
         if kwargs["year"]:
             kwargs["archive_date"] = now().replace(kwargs["year"], kwargs["month"] or 1, 1)
-        context = super().get_context_data(**kwargs)
-        return context
+        return super().get_context_data(**kwargs)
 
 
 class TaggedListView(BaseBlogListView, ListView):
@@ -138,8 +140,7 @@ class TaggedListView(BaseBlogListView, ListView):
 
     def get_context_data(self, **kwargs):
         kwargs["tagged_entries"] = self.kwargs.get("tag") if "tag" in self.kwargs else None
-        context = super().get_context_data(**kwargs)
-        return context
+        return super().get_context_data(**kwargs)
 
 
 class AuthorEntriesView(BaseBlogListView, ListView):
@@ -148,13 +149,12 @@ class AuthorEntriesView(BaseBlogListView, ListView):
     def get_queryset(self):
         qs = super().get_queryset()
         if "username" in self.kwargs:
-            qs = qs.filter(**{"author__%s" % User.USERNAME_FIELD: self.kwargs["username"]})
+            qs = qs.filter(**{f"author__{User.USERNAME_FIELD}": self.kwargs["username"]})
         return self.optimize(qs)
 
     def get_context_data(self, **kwargs):
         kwargs["author"] = get_object_or_404(User, **{User.USERNAME_FIELD: self.kwargs.get("username")})
-        context = super().get_context_data(**kwargs)
-        return context
+        return super().get_context_data(**kwargs)
 
 
 class CategoryEntriesView(BaseBlogListView, ListView):

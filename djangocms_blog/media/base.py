@@ -56,8 +56,7 @@ class MediaAttachmentPluginMixin:
         """
         if not self._cached_params:
             for pattern in self._media_autoconfiguration["params"]:
-                match = pattern.match(self.media_url)
-                if match:
+                if match := pattern.match(self.media_url):
                     if self._media_autoconfiguration["callable"]:
                         self._cached_params = getattr(self, self._media_autoconfiguration["callable"])(
                             **match.groupdict()

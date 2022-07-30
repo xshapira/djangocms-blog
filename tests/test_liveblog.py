@@ -30,8 +30,7 @@ async def _connect(post):
 
 def get_request(path):
     factory = RequestFactory()
-    request = factory.get(path)
-    return request
+    return factory.get(path)
 
 
 @database_sync_to_async
@@ -82,7 +81,7 @@ async def test_add_plugin():
     assert plugin.pk == rendered["id"]
     assert plugin.creation_date.strftime(DATE_FORMAT) == rendered["creation_date"]
     assert plugin.changed_date.strftime(DATE_FORMAT) == rendered["changed_date"]
-    assert rendered["content"].find('data-post-id="{}"'.format(plugin.pk)) > -1
+    assert rendered["content"].find(f'data-post-id="{plugin.pk}"') > -1
     assert rendered["content"].find(plugin_text) > -1
 
     plugin, admin, new_plugin_text = await update_livelobg_plugin_content(plugin)
@@ -91,7 +90,7 @@ async def test_add_plugin():
     assert plugin.pk == rendered["id"]
     assert plugin.creation_date.strftime(DATE_FORMAT) == rendered["creation_date"]
     assert plugin.changed_date.strftime(DATE_FORMAT) == rendered["changed_date"]
-    assert rendered["content"].find('data-post-id="{}"'.format(plugin.pk)) > -1
+    assert rendered["content"].find(f'data-post-id="{plugin.pk}"') > -1
     assert rendered["content"].find(new_plugin_text) > -1
     assert rendered["content"].find(plugin_text) == -1
 
@@ -113,7 +112,7 @@ async def test_add_plugin_no_publish():
     assert plugin.pk == rendered["id"]
     assert plugin.creation_date.strftime(DATE_FORMAT) == rendered["creation_date"]
     assert plugin.changed_date.strftime(DATE_FORMAT) == rendered["changed_date"]
-    assert rendered["content"].find('data-post-id="{}"'.format(plugin.pk)) > -1
+    assert rendered["content"].find(f'data-post-id="{plugin.pk}"') > -1
     assert rendered["content"].find(new_plugin_text) > -1
     assert rendered["content"].find(plugin_text) == -1
 
@@ -187,7 +186,7 @@ class LiveBlogTest(BaseTest):
         plugin.publish = True
         plugin.save()
         rendered = self.render_plugin(pages[0], "en", plugin, edit=True)
-        self.assertTrue(rendered.find('data-post-id="{}"'.format(plugin.pk)) > -1)
+        self.assertTrue(rendered.find(f'data-post-id="{plugin.pk}"') > -1)
         self.assertTrue(rendered.find("live text") > -1)
 
     def test_plugins_order(self):

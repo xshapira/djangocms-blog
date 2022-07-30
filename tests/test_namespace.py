@@ -20,7 +20,7 @@ class AdminTest(BaseTest):
         self.client = Client()
         self.client.login(username=self._admin_user_username, password=self._admin_user_password)
         response = self.client.post(
-            "/en/admin/cms/page/{}/advanced-settings/?language=en".format(page.pk),
+            f"/en/admin/cms/page/{page.pk}/advanced-settings/?language=en",
             {
                 "language": "nl",
                 "overwrite_url": "",
@@ -36,6 +36,7 @@ class AdminTest(BaseTest):
             },
             follow=True,
         )
+
         self.client.logout()
         return response
 

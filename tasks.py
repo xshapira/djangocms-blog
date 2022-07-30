@@ -17,10 +17,9 @@ def clean(c):
     c.run("python setup.py clean --all")
     patterns = ["build", "dist"]
     patterns.extend(glob("*.egg*"))
-    patterns.append("docs/_build")
-    patterns.append("**/*.pyc")
+    patterns.extend(("docs/_build", "**/*.pyc"))
     for pattern in patterns:
-        c.run("rm -rf {}".format(pattern))
+        c.run(f"rm -rf {pattern}")
 
 
 @task
@@ -36,7 +35,7 @@ def format(c):  # NOQA
 
 
 @task
-def towncrier_check(c):  # NOQA
+def towncrier_check(c):    # NOQA
     """ Check towncrier files. """
     output = io.StringIO()
     c.run("git branch --contains HEAD", out_stream=output)
@@ -65,26 +64,23 @@ def towncrier_check(c):  # NOQA
         try:
             parts = re.search(r"(?P<type>\w+)/\D*(?P<number>\d+)\D*", branch).groups()
             towncrier_file = os.path.join("changes", "{1}.{0}".format(*parts))
-            if not os.path.exists(towncrier_file) or os.path.getsize(towncrier_file) == 0:
-                print(
-                    "=========================\n"
-                    "Current tree does not contain the towncrier file {} or file is empty\n"
-                    "please check CONTRIBUTING documentation.\n"
-                    "========================="
-                    "".format(towncrier_file)
-                )
-                sys.exit(2)
-            else:
+            if (
+                os.path.exists(towncrier_file)
+                and os.path.getsize(towncrier_file) != 0
+            ):
                 break
+            print(
+                f"=========================\nCurrent tree does not contain the towncrier file {towncrier_file} or file is empty\nplease check CONTRIBUTING documentation.\n========================="
+            )
+
+            sys.exit(2)
         except AttributeError:
             pass
     if not towncrier_file:
         print(
-            "=========================\n"
-            "Branch {} does not respect the '<type>/(<optional-task-type>-)<number>-description' format\n"
-            "=========================\n"
-            "".format(branch)
+            f"=========================\nBranch {branch} does not respect the '<type>/(<optional-task-type>-)<number>-description' format\n=========================\n"
         )
+
         sys.exit(1)
 
 
@@ -111,7 +107,7 @@ def coverage(c):
 @task
 def tag_release(c, level):
     """ Tag release version. """
-    c.run("bumpversion --list %s --no-tag" % level)
+    c.run(f"bumpversion --list {level} --no-tag")
 
 
 @task
@@ -125,7 +121,7 @@ def docbuild(c):
     """ Build documentation. """
     os.chdir("docs")
     build_dir = os.environ.get("BUILD_DIR", "_build/html")
-    c.run("python -msphinx -W -b html -d _build/doctrees . %s" % build_dir)
+    c.run(f"python -msphinx -W -b html -d _build/doctrees . {build_dir}")
 
 
 @task(docbuild)

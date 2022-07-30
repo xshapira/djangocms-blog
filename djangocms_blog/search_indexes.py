@@ -32,9 +32,7 @@ try:
             language = self.get_current_language(using)
             filter_kwargs = self.get_index_kwargs(language)
             qs = self.get_index_queryset(language)
-            if filter_kwargs:
-                return qs.translated(language, **filter_kwargs)
-            return qs
+            return qs.translated(language, **filter_kwargs) if filter_kwargs else qs
 
         def get_index_queryset(self, language):
             return self.get_model().objects.published().active_translations(language_code=language)
@@ -56,11 +54,12 @@ try:
                 if keywords:
                     text_bits.append(" ".join(keywords))
                     self.prepared_data["keywords"] = ",".join(keywords)
-                for category in post.categories.all():
-                    text_bits.append(force_str(category.safe_translation_getter("name")))
-                for tag in post.tags.all():
-                    text_bits.append(force_str(tag.name))
+                text_bits.extend(
+                    force_str(category.safe_translation_getter("name"))
+                    for category in post.categories.all()
+                )
 
+                text_bits.extend(force_str(tag.name) for tag in post.tags.all())
                 if get_setting("USE_PLACEHOLDER"):
                     plugins = post.content.cmsplugin_set.filter(language=language)
                     content_bits = []

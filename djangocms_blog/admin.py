@@ -31,11 +31,13 @@ def register_extension(klass):
         return
     if issubclass(klass, models.Model):
         if klass in signal_dict:
-            raise Exception("Can not register {} twice.".format(klass))
+            raise Exception(f"Can not register {klass} twice.")
         signal_dict[klass] = create_post_post_save(klass)
         signals.post_save.connect(signal_dict[klass], sender=Post, weak=False)
         return
-    raise Exception("Can not register {} type. You can only register a Model or a TabularInline.".format(klass))
+    raise Exception(
+        f"Can not register {klass} type. You can only register a Model or a TabularInline."
+    )
 
 
 def unregister_extension(klass):
@@ -44,11 +46,13 @@ def unregister_extension(klass):
         return
     if issubclass(klass, models.Model):
         if klass not in signal_dict:
-            raise Exception("Can not unregister {}. No signal found for this class.".format(klass))
+            raise Exception(f"Can not unregister {klass}. No signal found for this class.")
         signals.post_save.disconnect(signal_dict[klass], sender=Post)
         del signal_dict[klass]
         return
-    raise Exception("Can not unregister {} type. You can only unregister a Model or a TabularInline.".format(klass))
+    raise Exception(
+        f"Can not unregister {klass} type. You can only unregister a Model or a TabularInline."
+    )
 
 
 def create_post_post_save(model):
@@ -368,13 +372,8 @@ class PostAdmin(PlaceholderAdminMixin, FrontendEditableAdminMixin, ModelAppHookC
         app_config_default = self._app_config_select(request, obj)
         if app_config_default is None and request.method == "GET":
             return super().get_fieldsets(request, obj)
-        if not obj:
-            config = app_config_default
-        else:
-            config = obj.app_config
-
+        config = obj.app_config if obj else app_config_default
         fsets = deepcopy(self._fieldsets)
-        related_posts = []
         if config:
             abstract = bool(config.use_abstract)
             placeholder = bool(config.use_placeholder)
@@ -383,8 +382,7 @@ class PostAdmin(PlaceholderAdminMixin, FrontendEditableAdminMixin, ModelAppHookC
             abstract = get_setting("USE_ABSTRACT")
             placeholder = get_setting("USE_PLACEHOLDER")
             related = get_setting("USE_RELATED")
-        if related:
-            related_posts = self._get_available_posts(config)
+        related_posts = self._get_available_posts(config) if related else []
         if abstract:
             self._patch_fieldsets(fsets, "abstract")
         if not placeholder:

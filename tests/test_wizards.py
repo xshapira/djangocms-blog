@@ -67,14 +67,15 @@ class WizardTest(BaseTest):
                 form = wiz.form(
                     data=self.get_querydict(
                         {
-                            "1-title": "title{}".format(index),
-                            "1-abstract": "abstract{}".format(index),
+                            "1-title": f"title{index}",
+                            "1-abstract": f"abstract{index}",
                             "1-categories": cats[app_config].pk,
                             "1-post_text": "Random text",
                         }
                     ),
                     prefix=1,
                 )
+
                 self.assertEqual(form.default_appconfig, app_config)
                 self.assertTrue(form.is_valid())
                 self.assertEqual(form.cleaned_data["app_config"].pk, app_config)
@@ -94,13 +95,14 @@ class WizardTest(BaseTest):
                     form = wiz.form(
                         data=self.get_querydict(
                             {
-                                "1-title": "title-2{}".format(index),
-                                "1-abstract": "abstract-2{}".format(index),
+                                "1-title": f"title-2{index}",
+                                "1-abstract": f"abstract-2{index}",
                                 "1-categories": cats[app_config].pk,
                             }
                         ),
                         prefix=1,
                     )
+
                     self.assertEqual(form.default_appconfig, app_config)
                     self.assertTrue(form.is_valid())
                     self.assertEqual(form.cleaned_data["app_config"].pk, app_config)

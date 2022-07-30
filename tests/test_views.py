@@ -131,7 +131,11 @@ class ViewTest(BaseTest):
         view_obj_1.args = ()
         view_obj_1.kwargs = {}
         view_obj_1.namespace, view_obj_1.config = get_app_instance(request)
-        self.assertEqual(view_obj_1.get_view_url(), "http://testserver{}".format(pages[1].get_absolute_url()))
+        self.assertEqual(
+            view_obj_1.get_view_url(),
+            f"http://testserver{pages[1].get_absolute_url()}",
+        )
+
 
         request = self.get_request(pages[2], "en", AnonymousUser())
         view_obj_2 = PostListView()
@@ -139,7 +143,11 @@ class ViewTest(BaseTest):
         view_obj_2.args = ()
         view_obj_2.kwargs = {}
         view_obj_2.namespace, view_obj_2.config = get_app_instance(request)
-        self.assertEqual(view_obj_2.get_view_url(), "http://testserver{}".format(pages[2].get_absolute_url()))
+        self.assertEqual(
+            view_obj_2.get_view_url(),
+            f"http://testserver{pages[2].get_absolute_url()}",
+        )
+
 
         view_obj_2.view_url_name = None
         with self.assertRaises(ImproperlyConfigured):
@@ -485,15 +493,18 @@ class InstanctArticlesViewTest(BaseTest):
                 feed.namespace, feed.config = get_app_instance(request)
                 self.assertEqual(list(feed.items()), [posts[0]])
                 xml = feed(request)
-                self.assertContains(xml, "<guid>{}</guid>".format(posts[0].guid))
+                self.assertContains(xml, f"<guid>{posts[0].guid}</guid>")
                 self.assertContains(xml, "content:encoded")
                 self.assertContains(
                     xml,
-                    'class="op-modified" datetime="{}"'.format(
-                        posts[0].date_modified.strftime(FBInstantFeed.date_format)
-                    ),
+                    f'class="op-modified" datetime="{posts[0].date_modified.strftime(FBInstantFeed.date_format)}"',
                 )
-                self.assertContains(xml, '<link rel="canonical" href="{}"/>'.format(posts[0].get_full_url()))
+
+                self.assertContains(
+                    xml,
+                    f'<link rel="canonical" href="{posts[0].get_full_url()}"/>',
+                )
+
                 # Assert text transformation
                 self.assertContains(xml, "<h2>Ciao</h2><p>Ciao</p>")
                 self.assertContains(xml, "<a>Admin User</a>")

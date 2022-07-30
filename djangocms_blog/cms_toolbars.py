@@ -20,8 +20,9 @@ class BlogToolbar(CMSToolbar):
             admin_menu.add_modal_item(_("Post list"), url=url)
             url = reverse("admin:djangocms_blog_post_add")
             admin_menu.add_modal_item(_("Add post"), url=url)
-            current_config = getattr(self.request, get_setting("CURRENT_NAMESPACE"), None)
-            if current_config:
+            if current_config := getattr(
+                self.request, get_setting("CURRENT_NAMESPACE"), None
+            ):
                 url = reverse("admin:djangocms_blog_blogconfig_change", args=(current_config.pk,))
                 admin_menu.add_modal_item(_("Edit configuration"), url=url)
 
