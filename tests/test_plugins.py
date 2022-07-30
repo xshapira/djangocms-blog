@@ -30,9 +30,21 @@ class PluginTest(BaseTest):
         plugin = add_plugin(ph, "BlogLatestEntriesPluginCached", language="en", app_config=self.app_config_1)
         rendered = self.render_plugin(pages[0], "en", plugin, edit=True)
         try:
-            self.assertTrue(rendered.find("cms-plugin-djangocms_blog-post-abstract-%s" % posts[0].pk) > -1)
+            self.assertTrue(
+                rendered.find(
+                    f"cms-plugin-djangocms_blog-post-abstract-{posts[0].pk}"
+                )
+                > -1
+            )
+
         except AssertionError:
-            self.assertTrue(rendered.find("cms_plugin-djangocms_blog-post-abstract-%s" % posts[0].pk) > -1)
+            self.assertTrue(
+                rendered.find(
+                    f"cms_plugin-djangocms_blog-post-abstract-{posts[0].pk}"
+                )
+                > -1
+            )
+
         self.assertTrue(rendered.find("<p>first line</p>") > -1)
         self.assertTrue(rendered.find('<article id="post-first-post"') > -1)
         self.assertTrue(rendered.find(posts[0].get_absolute_url()) > -1)
@@ -66,9 +78,21 @@ class PluginTest(BaseTest):
 
         rendered = self.render_plugin(pages[0], "en", plugin, edit=True)
         try:
-            self.assertTrue(rendered.find("cms-plugin-djangocms_blog-post-abstract-%s" % posts[0].pk) > -1)
+            self.assertTrue(
+                rendered.find(
+                    f"cms-plugin-djangocms_blog-post-abstract-{posts[0].pk}"
+                )
+                > -1
+            )
+
         except AssertionError:
-            self.assertTrue(rendered.find("cms_plugin-djangocms_blog-post-abstract-%s" % posts[0].pk) > -1)
+            self.assertTrue(
+                rendered.find(
+                    f"cms_plugin-djangocms_blog-post-abstract-{posts[0].pk}"
+                )
+                > -1
+            )
+
         self.assertTrue(rendered.find(reverse("djangocms_blog:posts-tagged", kwargs={"tag": tag.slug})) > -1)
         self.assertTrue(rendered.find("<p>first line</p>") > -1)
         self.assertTrue(rendered.find('<article id="post-first-post"') > -1)
@@ -85,9 +109,21 @@ class PluginTest(BaseTest):
 
         rendered = self.render_plugin(pages[0], "en", plugin, edit=True)
         try:
-            self.assertTrue(rendered.find("cms-plugin-djangocms_blog-post-abstract-%s" % posts[1].pk) > -1)
+            self.assertTrue(
+                rendered.find(
+                    f"cms-plugin-djangocms_blog-post-abstract-{posts[1].pk}"
+                )
+                > -1
+            )
+
         except AssertionError:
-            self.assertTrue(rendered.find("cms_plugin-djangocms_blog-post-abstract-%s" % posts[1].pk) > -1)
+            self.assertTrue(
+                rendered.find(
+                    f"cms_plugin-djangocms_blog-post-abstract-{posts[1].pk}"
+                )
+                > -1
+            )
+
         self.assertTrue(
             rendered.find(reverse("djangocms_blog:posts-category", kwargs={"category": category_2.slug})) > -1
         )
@@ -142,9 +178,9 @@ class PluginTest(BaseTest):
         for tag in Tag.objects.all():
             self.assertTrue(rendered.find(reverse("djangocms_blog:posts-tagged", kwargs={"tag": tag.slug})) > -1)
             if tag.slug == "test-tag":
-                rf = r"\s+{}\s+<span>\(\s+{} articles".format(tag.name, 2)
+                rf = f"\s+{tag.name}\s+<span>\(\s+2 articles"
             else:
-                rf = r"\s+{}\s+<span>\(\s+{} article".format(tag.name, 1)
+                rf = f"\s+{tag.name}\s+<span>\(\s+1 article"
             rx = re.compile(rf)
             self.assertEqual(len(rx.findall(rendered)), 1)
 
@@ -281,7 +317,7 @@ class PluginTest10(BaseTest):
             "plugin_type": "BlogAuthorPostsPlugin",
             "plugin_language": "en",
         }
-        path = "/en/?%s" % urlencode(parms)
+        path = f"/en/?{urlencode(parms)}"
         request = self.get_request(pages[0], "en", user=self.user, path=path)
         response = page_admin.add_plugin(request)
         form_authors = response.context_data["adminform"].form.fields["authors"].queryset
@@ -311,7 +347,7 @@ class PluginTest10(BaseTest):
                 "plugin_type": plugin,
                 "plugin_language": "en",
             }
-            path = "/en/?%s" % urlencode(parms)
+            path = f"/en/?{urlencode(parms)}"
             request = self.get_request(pages[0], "en", user=self.user, path=path)
             response = page_admin.add_plugin(request)
             with self.assertRaises(KeyError):
@@ -340,7 +376,7 @@ class PluginTest10(BaseTest):
                 "plugin_type": plugin,
                 "plugin_language": "en",
             }
-            path = "/en/?%s" % urlencode(parms)
+            path = f"/en/?{urlencode(parms)}"
             request = self.get_request(pages[0], "en", user=self.user, path=path)
             response = page_admin.add_plugin(request)
             template_folder_field = response.context_data["adminform"].form.fields["template_folder"]

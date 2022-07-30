@@ -212,8 +212,12 @@ class AdminTest(BaseTest):
 
         # Filtering on the apphook config and site
         request = self.get_page_request(
-            "/", self.user, r"/en/blog/?app_config__id__exact=%s&sites=1" % self.app_config_1.pk, edit=False
+            "/",
+            self.user,
+            f"/en/blog/?app_config__id__exact={self.app_config_1.pk}&sites=1",
+            edit=False,
         )
+
         response = post_admin.changelist_view(request)
         # First and last post in the list are now in the queryset
         self.assertEqual(response.context_data["cl"].queryset.count(), len(posts) - 2)
@@ -272,7 +276,7 @@ class AdminTest(BaseTest):
         self.assertContains(response, '<option value="%s">Blog / sample_app</option>' % self.app_config_1.pk)
 
         # Add view select categories on the given appconfig, even when reloading the form
-        request.POST = QueryDict("app_config=%s" % self.app_config_1.pk)
+        request.POST = QueryDict(f"app_config={self.app_config_1.pk}")
         request.method = "POST"
         response = category_admin.add_view(request)
         self.assertEqual(
@@ -280,7 +284,7 @@ class AdminTest(BaseTest):
             list(BlogCategory.objects.filter(app_config=self.app_config_1)),
         )
 
-        request.GET = QueryDict("app_config=%s" % self.app_config_1.pk)
+        request.GET = QueryDict(f"app_config={self.app_config_1.pk}")
         request.method = "GET"
         response = category_admin.add_view(request)
         self.assertEqual(
@@ -338,7 +342,13 @@ class AdminTest(BaseTest):
         BlogCategory.objects.create(name="category different branch", app_config=self.app_config_2)
 
         post_admin = admin.site._registry[BlogCategory]
-        request = self.get_page_request("/", self.user, r"/en/blog/?app_config=%s" % self.app_config_1.pk, edit=False)
+        request = self.get_page_request(
+            "/",
+            self.user,
+            f"/en/blog/?app_config={self.app_config_1.pk}",
+            edit=False,
+        )
+
 
         # Add view shows all the exising categories
         response = post_admin.add_view(request)
@@ -355,7 +365,13 @@ class AdminTest(BaseTest):
         )
 
         # Test second apphook categories
-        request = self.get_page_request("/", self.user, r"/en/blog/?app_config=%s" % self.app_config_2.pk, edit=False)
+        request = self.get_page_request(
+            "/",
+            self.user,
+            f"/en/blog/?app_config={self.app_config_2.pk}",
+            edit=False,
+        )
+
         response = post_admin.add_view(request)
         self.assertTrue(
             response.context_data["adminform"].form.fields["parent"].queryset,
@@ -365,8 +381,12 @@ class AdminTest(BaseTest):
     def test_admin_fieldsets(self):
         post_admin = admin.site._registry[Post]
         request = self.get_page_request(
-            "/", self.user_staff, r"/en/blog/?app_config=%s" % self.app_config_1.pk, edit=False
+            "/",
+            self.user_staff,
+            f"/en/blog/?app_config={self.app_config_1.pk}",
+            edit=False,
         )
+
 
         # Use placeholder
         self.app_config_1.app_data.config.use_placeholder = True
@@ -427,14 +447,24 @@ class AdminTest(BaseTest):
             fsets = post_admin.get_fieldsets(request)
             self.assertFalse("sites" in fsets[1][1]["fields"][0])
 
-        request = self.get_page_request("/", self.user, r"/en/blog/?app_config=%s" % self.app_config_1.pk, edit=False)
+        request = self.get_page_request(
+            "/",
+            self.user,
+            f"/en/blog/?app_config={self.app_config_1.pk}",
+            edit=False,
+        )
+
         fsets = post_admin.get_fieldsets(request)
         self.assertTrue("author" in fsets[1][1]["fields"][0])
 
         with self.login_user_context(self.user):
             request = self.get_request(
-                "/", "en", user=self.user, path=r"/en/blog/?app_config=%s" % self.app_config_1.pk
+                "/",
+                "en",
+                user=self.user,
+                path=f"/en/blog/?app_config={self.app_config_1.pk}",
             )
+
             msg_mid = MessageMiddleware()
             msg_mid.process_request(request)
             post_admin = admin.site._registry[Post]
@@ -449,7 +479,7 @@ class AdminTest(BaseTest):
             self.assertRegex(force_str(response.content), r"selected[^>]*>Blog thumbnail")
 
             # Add view select categories on the given appconfig, even when reloading the form
-            request.POST = QueryDict("app_config=%s" % self.app_config_1.pk)
+            request.POST = QueryDict(f"app_config={self.app_config_1.pk}")
             request.method = "POST"
             response = post_admin.add_view(request)
             self.assertTrue(
@@ -457,7 +487,7 @@ class AdminTest(BaseTest):
                 BlogCategory.objects.filter(app_config=self.app_config_1),
             )
 
-            request.GET = QueryDict("app_config=%s" % self.app_config_1.pk)
+            request.GET = QueryDict(f"app_config={self.app_config_1.pk}")
             request.method = "GET"
             response = post_admin.add_view(request)
             self.assertTrue(
@@ -468,8 +498,12 @@ class AdminTest(BaseTest):
         self.user.sites.add(self.site_1)
         with self.login_user_context(self.user):
             request = self.get_request(
-                "/", "en", user=self.user, path=r"/en/blog/?app_config=%s" % self.app_config_1.pk
+                "/",
+                "en",
+                user=self.user,
+                path=f"/en/blog/?app_config={self.app_config_1.pk}",
             )
+
             msg_mid = MessageMiddleware()
             msg_mid.process_request(request)
             post_admin = admin.site._registry[Post]
@@ -483,8 +517,12 @@ class AdminTest(BaseTest):
     def test_custom_admin_fieldsets(self):
         post_admin = CustomPostAdmin(Post, admin_site=admin.site)
         request = self.get_page_request(
-            "/", self.user_staff, r"/en/blog/?app_config=%s" % self.app_config_1.pk, edit=False
+            "/",
+            self.user_staff,
+            f"/en/blog/?app_config={self.app_config_1.pk}",
+            edit=False,
         )
+
 
         # Use placeholder
         self.app_config_1.app_data.config.use_placeholder = True
@@ -545,7 +583,13 @@ class AdminTest(BaseTest):
             fsets = post_admin.get_fieldsets(request)
             self.assertFalse("sites" in fsets[1][1]["fields"][0])
 
-        request = self.get_page_request("/", self.user, r"/en/blog/?app_config=%s" % self.app_config_1.pk, edit=False)
+        request = self.get_page_request(
+            "/",
+            self.user,
+            f"/en/blog/?app_config={self.app_config_1.pk}",
+            edit=False,
+        )
+
         fsets = post_admin.get_fieldsets(request)
         self.assertTrue("author" in fsets[1][1]["fields"])
 
@@ -554,14 +598,26 @@ class AdminTest(BaseTest):
         posts[0].sites.add(self.site_1)
         posts[1].sites.add(self.site_2)
 
-        request = self.get_request("/", "en", user=self.user, path=r"/en/blog/?app_config=%s" % self.app_config_1.pk)
+        request = self.get_request(
+            "/",
+            "en",
+            user=self.user,
+            path=f"/en/blog/?app_config={self.app_config_1.pk}",
+        )
+
         post_admin = admin.site._registry[Post]
         post_admin._sites = None
         qs = post_admin.get_queryset(request)
         self.assertEqual(qs.count(), 4)
 
         self.user.sites.add(self.site_2)
-        request = self.get_request("/", "en", user=self.user, path=r"/en/blog/?app_config=%s" % self.app_config_1.pk)
+        request = self.get_request(
+            "/",
+            "en",
+            user=self.user,
+            path=f"/en/blog/?app_config={self.app_config_1.pk}",
+        )
+
         post_admin = admin.site._registry[Post]
         post_admin._sites = None
         qs = post_admin.get_queryset(request)
@@ -581,8 +637,13 @@ class AdminTest(BaseTest):
             data["categories"] = self.category_1.pk
             data["app_config"] = self.app_config_1.pk
             request = self.post_request(
-                pages[0], "en", user=self.user, data=data, path=r"/en/blog/?app_config=%s" % self.app_config_1.pk
+                pages[0],
+                "en",
+                user=self.user,
+                data=data,
+                path=f"/en/blog/?app_config={self.app_config_1.pk}",
             )
+
             msg_mid = MessageMiddleware()
             msg_mid.process_request(request)
             post_admin = admin.site._registry[Post]
@@ -599,8 +660,13 @@ class AdminTest(BaseTest):
             data["categories"] = self.category_1.pk
             data["app_config"] = self.app_config_1.pk
             request = self.post_request(
-                pages[0], "en", user=self.user, data=data, path=r"/en/blog/?app_config=%s" % self.app_config_1.pk
+                pages[0],
+                "en",
+                user=self.user,
+                data=data,
+                path=f"/en/blog/?app_config={self.app_config_1.pk}",
             )
+
             msg_mid = MessageMiddleware()
             msg_mid.process_request(request)
             post_admin = admin.site._registry[Post]
@@ -618,8 +684,13 @@ class AdminTest(BaseTest):
                 data["categories"] = self.category_1.pk
                 data["app_config"] = self.app_config_1.pk
                 request = self.post_request(
-                    pages[0], "en", user=self.user, data=data, path=r"/en/blog/?app_config=%s" % self.app_config_1.pk
+                    pages[0],
+                    "en",
+                    user=self.user,
+                    data=data,
+                    path=f"/en/blog/?app_config={self.app_config_1.pk}",
                 )
+
                 msg_mid = MessageMiddleware()
                 msg_mid.process_request(request)
                 post_admin = admin.site._registry[Post]
@@ -630,7 +701,10 @@ class AdminTest(BaseTest):
 
     def test_admin_fieldsets_filter(self):
         post_admin = admin.site._registry[Post]
-        request = self.get_page_request("/", self.user_normal, r"/en/blog/?app_config=%s" % self.app_config_1.pk)
+        request = self.get_page_request(
+            "/", self.user_normal, f"/en/blog/?app_config={self.app_config_1.pk}"
+        )
+
 
         post_admin._sites = None
         fsets = post_admin.get_fieldsets(request)
@@ -644,7 +718,10 @@ class AdminTest(BaseTest):
             return fs
 
         self.user_normal.sites.add(self.site_1)
-        request = self.get_page_request("/", self.user_normal, r"/en/blog/?app_config=%s" % self.app_config_1.pk)
+        request = self.get_page_request(
+            "/", self.user_normal, f"/en/blog/?app_config={self.app_config_1.pk}"
+        )
+
         post_admin._sites = None
         with self.settings(BLOG_ADMIN_POST_FIELDSET_FILTER=filter_function):
             fsets = post_admin.get_fieldsets(request)

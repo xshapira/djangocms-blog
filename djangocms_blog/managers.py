@@ -94,29 +94,24 @@ class GenericDateQuerySet(AppHookConfigTranslatableQueryset):
     def published(self, current_site=True):
         queryset = self.published_future(current_site)
         if self.start_date_field:
-            return queryset.filter(**{"%s__lte" % self.start_date_field: now()})
+            return queryset.filter(**{f"{self.start_date_field}__lte": now()})
         else:
             return queryset
 
     def published_future(self, current_site=True):
-        if current_site:
-            queryset = self.on_site()
-        else:
-            queryset = self
+        queryset = self.on_site() if current_site else self
         if self.end_date_field:
-            qfilter = models.Q(**{"%s__gte" % self.end_date_field: now()}) | models.Q(
-                **{"%s__isnull" % self.end_date_field: True}
-            )
+            qfilter = models.Q(
+                **{f"{self.end_date_field}__gte": now()}
+            ) | models.Q(**{f"{self.end_date_field}__isnull": True})
+
             queryset = queryset.filter(qfilter)
         return queryset.filter(**{self.publish_field: True})
 
     def archived(self, current_site=True):
-        if current_site:
-            queryset = self.on_site()
-        else:
-            queryset = self
+        queryset = self.on_site() if current_site else self
         if self.end_date_field:
-            qfilter = models.Q(**{"%s__lte" % self.end_date_field: now()})
+            qfilter = models.Q(**{f"{self.end_date_field}__lte": now()})
             queryset = queryset.filter(qfilter)
         return queryset.filter(**{self.publish_field: True})
 
@@ -171,10 +166,7 @@ class GenericDateTaggedManager(TaggedFilterItem, AppHookConfigTranslatableManage
         dates_qs = queryset.values_list(queryset.start_date_field, queryset.fallback_date_field)
         dates = []
         for blog_dates in dates_qs:
-            if blog_dates[0]:
-                current_date = blog_dates[0]
-            else:
-                current_date = blog_dates[1]
+            current_date = blog_dates[0] or blog_dates[1]
             dates.append((current_date.year, current_date.month,))
         date_counter = Counter(dates)
         dates = set(dates)

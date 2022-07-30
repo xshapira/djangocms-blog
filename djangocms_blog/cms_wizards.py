@@ -70,7 +70,7 @@ class PostWizardForm(PostAdminFormBase):
         slug = source
         i = 1
         while slug in used:
-            slug = "{}-{}".format(source, i)
+            slug = f"{source}-{i}"
             i += 1
         return slug
 
@@ -97,9 +97,12 @@ class PostWizard(Wizard):
 
 
 for config in BlogConfig.objects.all().order_by("namespace"):
-    seed = slugify("{}.{}".format(config.app_title, config.namespace))
+    seed = slugify(f"{config.app_title}.{config.namespace}")
     new_wizard = type(str(seed), (PostWizard,), {})
-    new_form = type("{}Form".format(seed), (PostWizardForm,), {"default_appconfig": config.pk})
+    new_form = type(
+        f"{seed}Form", (PostWizardForm,), {"default_appconfig": config.pk}
+    )
+
     post_wizard = new_wizard(
         title=_("New {0}").format(config.object_name),
         weight=200,
@@ -114,7 +117,5 @@ for config in BlogConfig.objects.all().order_by("namespace"):
             raise
         else:
             warnings.warn(
-                "Wizard {} cannot be registered. Please make sure that "
-                "BlogConfig.namespace {} and BlogConfig.app_title {} are"
-                "unique together".format(seed, config.namespace, config.app_title)
+                f"Wizard {seed} cannot be registered. Please make sure that BlogConfig.namespace {config.namespace} and BlogConfig.app_title {config.app_title} areunique together"
             )

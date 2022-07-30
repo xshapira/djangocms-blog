@@ -49,8 +49,11 @@ class LiveblogInterface(models.Model):
 
     @property
     def liveblog_group(self):
-        post = Post.objects.language(self.language).filter(liveblog=self.placeholder).first()
-        if post:
+        if (
+            post := Post.objects.language(self.language)
+            .filter(liveblog=self.placeholder)
+            .first()
+        ):
             return post.liveblog_group
 
     def render(self, request):

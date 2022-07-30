@@ -55,18 +55,21 @@ class BlogCategoryMenu(CMSAttachMenu):
                     logger.exception(e)
                     return []
             config = self._config[self.instance.application_namespace]
-            if not getattr(request, "toolbar", False) or not request.toolbar.edit_mode_active:
-                if self.instance == self.instance.get_draft_object():
-                    return []
-            else:
+            if (
+                getattr(request, "toolbar", False)
+                and request.toolbar.edit_mode_active
+            ):
                 if self.instance == self.instance.get_public_object():
                     return []
-        if config and config.menu_structure in (MENU_TYPE_COMPLETE, MENU_TYPE_CATEGORIES):
-            categories_menu = True
-        if config and config.menu_structure in (MENU_TYPE_COMPLETE, MENU_TYPE_POSTS):
-            posts_menu = True
-        if config and config.menu_structure in (MENU_TYPE_NONE,):
-            return nodes
+            elif self.instance == self.instance.get_draft_object():
+                return []
+        if config:
+            if config.menu_structure in (MENU_TYPE_COMPLETE, MENU_TYPE_CATEGORIES):
+                categories_menu = True
+            if config.menu_structure in (MENU_TYPE_COMPLETE, MENU_TYPE_POSTS):
+                posts_menu = True
+            if config.menu_structure in (MENU_TYPE_NONE,):
+                return nodes
 
         used_categories = []
         if posts_menu:
@@ -84,12 +87,11 @@ class BlogCategoryMenu(CMSAttachMenu):
                 parent = None
                 used_categories.extend(post.categories.values_list("pk", flat=True))
                 if categories_menu:
-                    category = post.categories.first()
-                    if category:
-                        parent = "{}-{}".format(category.__class__.__name__, category.pk)
-                        post_id = ("{}-{}".format(post.__class__.__name__, post.pk),)
+                    if category := post.categories.first():
+                        parent = f"{category.__class__.__name__}-{category.pk}"
+                        post_id = (f"{post.__class__.__name__}-{post.pk}", )
                 else:
-                    post_id = ("{}-{}".format(post.__class__.__name__, post.pk),)
+                    post_id = (f"{post.__class__.__name__}-{post.pk}", )
                 if post_id:
                     node = NavigationNode(post.get_title(), post.get_absolute_url(language), post_id, parent)
                     nodes.append(node)
@@ -113,9 +115,12 @@ class BlogCategoryMenu(CMSAttachMenu):
                     node = NavigationNode(
                         category.name,
                         category.get_absolute_url(),
-                        "{}-{}".format(category.__class__.__name__, category.pk),
-                        ("{}-{}".format(category.__class__.__name__, category.parent.id) if category.parent else None),
+                        f"{category.__class__.__name__}-{category.pk}",
+                        f"{category.__class__.__name__}-{category.parent.id}"
+                        if category.parent
+                        else None,
                     )
+
                     nodes.append(node)
                     added_categories.append(category.pk)
 
@@ -168,7 +173,7 @@ class BlogNavModifier(Modifier):
             return nodes
 
         for node in nodes:
-            if "{}-{}".format(category.__class__.__name__, category.pk) == node.id:
+            if f"{category.__class__.__name__}-{category.pk}" == node.id:
                 node.selected = True
         return nodes
 

@@ -14,10 +14,10 @@ from .views import (
 
 def get_urls():
     urls = get_setting("PERMALINK_URLS")
-    details = []
-    for urlconf in urls.values():
-        details.append(url(urlconf, PostDetailView.as_view(), name="post-detail"),)
-    return details
+    return [
+        url(urlconf, PostDetailView.as_view(), name="post-detail")
+        for urlconf in urls.values()
+    ]
 
 
 detail_urls = get_urls()

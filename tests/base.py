@@ -259,8 +259,7 @@ class BaseTest(BaseTestCase):
     def get_post_index(self):
         search_conn = connections[DEFAULT_ALIAS]
         unified_index = search_conn.get_unified_index()
-        index = unified_index.get_index(Post)
-        return index
+        return unified_index.get_index(Post)
 
     def _reset_menus(self):
         cache.clear()
@@ -288,7 +287,4 @@ class BaseTest(BaseTestCase):
         """
         full_path = os.path.join(os.path.dirname(__file__), path)
         with open(full_path) as src:
-            if raw:
-                return src.read()
-            else:
-                return json.load(src)
+            return src.read() if raw else json.load(src)

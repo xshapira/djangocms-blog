@@ -30,7 +30,7 @@ class LatestEntriesFeed(Feed):
         return super().__call__(request, *args, **kwargs)
 
     def link(self):
-        return reverse("%s:posts-latest" % self.namespace, current_app=self.namespace)
+        return reverse(f"{self.namespace}:posts-latest", current_app=self.namespace)
 
     def title(self):
         return Site.objects.get_current().name

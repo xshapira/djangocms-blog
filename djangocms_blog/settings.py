@@ -599,4 +599,4 @@ def get_setting(name):
     """Get setting value from django settings with fallback to globals defaults."""
     from django.conf import settings
 
-    return getattr(settings, "BLOG_%s" % name, params["BLOG_%s" % name])
+    return getattr(settings, f"BLOG_{name}", params[f"BLOG_{name}"])

@@ -17,7 +17,7 @@ class MenuTest(BaseTest):
     def setUp(self):
         super().setUp()
         self.cats = [self.category_1]
-        for _i, lang_data in enumerate(self._categories_data):
+        for lang_data in self._categories_data:
             cat = self._get_category(lang_data["en"])
             if "it" in lang_data:
                 cat = self._get_category(lang_data["it"], cat, "it")
@@ -151,7 +151,7 @@ class MenuTest(BaseTest):
         self.app_config_1.save()
         self._reset_menus()
         for lang in languages:
-            request = self.get_page_request(None, self.user, r"/%s/page-two/" % lang)
+            request = self.get_page_request(None, self.user, f"/{lang}/page-two/")
             with smart_override(lang):
                 self._reset_menus()
                 nodes = self.get_nodes(menu_pool, request)
@@ -164,7 +164,7 @@ class MenuTest(BaseTest):
         self.app_config_1.save()
         self._reset_menus()
         for lang in languages:
-            request = self.get_page_request(None, self.user, r"/%s/page-two/" % lang)
+            request = self.get_page_request(None, self.user, f"/{lang}/page-two/")
             with smart_override(lang):
                 self._reset_menus()
                 nodes = self.get_nodes(menu_pool, request)
@@ -177,7 +177,7 @@ class MenuTest(BaseTest):
         self.app_config_1.save()
         self._reset_menus()
         for lang in languages:
-            request = self.get_page_request(None, self.user, r"/%s/page-two/" % lang)
+            request = self.get_page_request(None, self.user, f"/{lang}/page-two/")
             with smart_override(lang):
                 self._reset_menus()
                 nodes = self.get_nodes(menu_pool, request)
@@ -190,7 +190,7 @@ class MenuTest(BaseTest):
         self.app_config_1.save()
         self._reset_menus()
         for lang in languages:
-            request = self.get_page_request(None, self.user, r"/%s/page-two/" % lang)
+            request = self.get_page_request(None, self.user, f"/{lang}/page-two/")
             with smart_override(lang):
                 self._reset_menus()
                 nodes = self.get_nodes(menu_pool, request)
@@ -205,7 +205,7 @@ class MenuTest(BaseTest):
         self.app_config_2.save()
         self._reset_menus()
         for lang in languages:
-            request = self.get_page_request(None, self.user, r"/%s/page-two/" % lang)
+            request = self.get_page_request(None, self.user, f"/{lang}/page-two/")
             with smart_override(lang):
                 self._reset_menus()
                 nodes = self.get_nodes(menu_pool, request)

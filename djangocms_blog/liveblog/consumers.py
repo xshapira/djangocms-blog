@@ -21,8 +21,7 @@ class LiveblogConsumer(JsonWebsocketConsumer):
         """
         Connect users to the group of the post according to the URL parameters
         """
-        post = self._get_post(self.scope["url_route"]["kwargs"])
-        if post:
+        if post := self._get_post(self.scope["url_route"]["kwargs"]):
             return [post.liveblog_group]
         else:
             return []

@@ -35,7 +35,10 @@ BLOG_CURRENT_NAMESPACE = get_setting("CURRENT_NAMESPACE")
 BLOG_PLUGIN_TEMPLATE_FOLDERS = get_setting("PLUGIN_TEMPLATE_FOLDERS")
 
 
-thumbnail_model = "{}.{}".format(ThumbnailOption._meta.app_label, ThumbnailOption.__name__)
+thumbnail_model = (
+    f"{ThumbnailOption._meta.app_label}.{ThumbnailOption.__name__}"
+)
+
 
 
 try:
@@ -157,13 +160,17 @@ class BlogCategory(BlogMetaMixin, TranslatableModel):
         if self.has_translation(lang):
             slug = self.safe_translation_getter("slug", language_code=lang)
             return reverse(
-                "%s:posts-category" % self.app_config.namespace,
+                f"{self.app_config.namespace}:posts-category",
                 kwargs={"category": slug},
                 current_app=self.app_config.namespace,
             )
+
         # in case category doesn't exist in this language, gracefully fallback
         # to posts-latest
-        return reverse("%s:posts-latest" % self.app_config.namespace, current_app=self.app_config.namespace)
+        return reverse(
+            f"{self.app_config.namespace}:posts-latest",
+            current_app=self.app_config.namespace,
+        )
 
     def __str__(self):
         default = gettext("BlogCategory (no translation)")
@@ -331,9 +338,7 @@ class Post(KnockerModel, BlogMetaMixin, TranslatableModel):
 
     @property
     def date(self):
-        if self.date_featured:
-            return self.date_featured
-        return self.date_published
+        return self.date_featured or self.date_published
 
     def save(self, *args, **kwargs):
         """
@@ -358,10 +363,7 @@ class Post(KnockerModel, BlogMetaMixin, TranslatableModel):
         with switch_language(self, lang):
             category = self.categories.first()
             kwargs = {}
-            if self.date_published:
-                current_date = self.date_published
-            else:
-                current_date = self.date_created
+            current_date = self.date_published or self.date_created
             urlconf = get_setting("PERMALINK_URLS")[self.app_config.url_patterns]
             if "<year>" in urlconf:
                 kwargs["year"] = current_date.year
@@ -375,7 +377,7 @@ class Post(KnockerModel, BlogMetaMixin, TranslatableModel):
                 kwargs["category"] = category.safe_translation_getter(
                     "slug", language_code=lang, any_language=True
                 )  # NOQA
-            return reverse("%s:post-detail" % self.app_config.namespace, kwargs=kwargs)
+            return reverse(f"{self.app_config.namespace}:post-detail", kwargs=kwargs)
 
     def get_title(self):
         title = self.safe_translation_getter("meta_title", any_language=True)
@@ -397,9 +399,7 @@ class Post(KnockerModel, BlogMetaMixin, TranslatableModel):
         return escape(strip_tags(description)).strip()
 
     def get_image_full_url(self):
-        if self.main_image:
-            return self.build_absolute_uri(self.main_image.url)
-        return ""
+        return self.build_absolute_uri(self.main_image.url) if self.main_image else ""
 
     def get_image_width(self):
         if self.main_image:
@@ -573,8 +573,7 @@ class AuthorEntriesPlugin(BasePostPlugin):
         self.authors.set(oldinstance.authors.all())
 
     def get_posts(self, request, published_only=True):
-        posts = self.post_queryset(request, published_only)
-        return posts
+        return self.post_queryset(request, published_only)
 
     def get_authors(self, request):
         authors = self.authors.all()
